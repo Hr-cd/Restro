@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
 import {
     Clock3,
     Eye,
@@ -10,27 +11,39 @@ import api from "../../services/api";
 const AdminOrdersPage = () => {
 
     const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            setError("");
 
             const response = await api.get("/admin/orders");
 
             setOrders(response.data.data);
-
         } catch (error) {
-            setError(
-                error.response?.data?.message ||
-                "Failed to load orders."
-            );
+            console.error("Failed to fetch orders:", error);
         } finally {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+    const socket = io("http://localhost:3000");
+
+    socket.on("new-order", (newOrder) => {
+        console.log("New order received:", newOrder);
+
+        setOrders((prevOrders) => [
+            newOrder,
+            ...prevOrders
+        ]);
+    });
+
+    return () => {
+        socket.disconnect();
+    };
+}, []);
 
     useEffect(() => {
         fetchOrders();
@@ -77,11 +90,11 @@ const AdminOrdersPage = () => {
                     className="flex items-center justify-center gap-2 rounded-xl border bg-white px-4 py-2.5 text-sm font-medium transition hover:bg-gray-50 disabled:opacity-50"
                 >
                     <RefreshCw
-                        size={17}
+                        size={18}
                         className={loading ? "animate-spin" : ""}
                     />
 
-                    Refresh
+                    {loading ? "Refreshing..." : "Refresh"}
                 </button>
 
             </div>

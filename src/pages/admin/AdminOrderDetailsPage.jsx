@@ -45,14 +45,9 @@ const AdminOrderDetailsPage = () => {
 
         const token = localStorage.getItem("adminToken");
 
-        const response = await axios.put(
-            `http://localhost:3000/api/admin/orders/${order._id}/status`,
-            { status },
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            }
+        const response = await api.put(
+            `/admin/orders/${order._id}/status`,
+            { status }
         );
 
         setOrder(response.data.data);

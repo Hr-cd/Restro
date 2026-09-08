@@ -4,14 +4,34 @@ import {
     MapPin,
     Receipt
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { io } from "socket.io-client";
 
 const OrderSuccessPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
-
     const order = location.state?.order;
     const tableToken = location.state?.tableToken;
+    const [status, setStatus] = useState(order?.status || "pending");
+
+    useEffect(() => {
+    if (!order?._id) return;
+
+    const socket = io("http://localhost:3000");
+
+    socket.on("order-status-updated", (updatedOrder) => {
+        console.log("Order status updated:", updatedOrder);
+
+        if (updatedOrder.orderId === order._id) {
+            setStatus(updatedOrder.status);
+        }
+    });
+
+    return () => {
+        socket.disconnect();
+    };
+}, [order?._id]);
 
     if (!order) {
         return (
@@ -90,7 +110,7 @@ const OrderSuccessPage = () => {
                         </span>
 
                         <span className="font-semibold capitalize">
-                            {order.status}
+                            {status}
                         </span>
                     </div>
 
