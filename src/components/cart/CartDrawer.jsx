@@ -4,7 +4,7 @@ import {
     Trash2,
     X
 } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 
 const CartDrawer = ({ isOpen, onClose }) => {
@@ -16,7 +16,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
         getItemUnitPrice,
         subtotal
     } = useCart();
-
+    const navigate = useNavigate();
     if (!isOpen) {
         return null;
     }
@@ -215,7 +215,13 @@ const CartDrawer = ({ isOpen, onClose }) => {
                             </span>
                         </div>
 
-                        <button className="w-full rounded-xl bg-black py-3 font-semibold text-white transition hover:opacity-90">
+                        <button
+                            onClick={() => {
+                                onClose();
+                                navigate("/checkout");
+                            }}
+                            className="w-full rounded-xl bg-black py-3 font-semibold text-white transition hover:opacity-90"
+                        >
                             Proceed to Checkout
                         </button>
 

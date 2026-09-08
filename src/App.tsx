@@ -5,6 +5,9 @@ import { CartProvider } from "./context/CartContext";
 // MenuPage is currently implemented in JSX and has no TypeScript declaration file.
 // @ts-expect-error The JSX module is valid at runtime but is not typed yet.
 import MenuPage from "./pages/MenuPage";
+// CheckoutPage is currently implemented in JSX and has no TypeScript declaration file.
+// @ts-expect-error The JSX module is valid at runtime but is not typed yet.
+import CheckoutPage from "./pages/CheckoutPage";
 
 const App = () => {
     return (
@@ -12,7 +15,10 @@ const App = () => {
             <BrowserRouter>
                 <Routes>
                     <Route path="/menu" element={<MenuPage />} />
-
+                    <Route
+                        path="/checkout"
+                        element={<CheckoutPage />}
+                    />
                     <Route
                         path="*"
                         element={<Navigate to="/menu" replace />}
