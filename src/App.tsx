@@ -11,6 +11,24 @@ import CheckoutPage from "./pages/CheckoutPage";
 // OrderSuccessPage is currently implemented in JSX and has no TypeScript declaration file.
 // @ts-expect-error The JSX module is valid at runtime but is not typed yet.
 import OrderSuccessPage from "./pages/OrderSuccessPage";
+// AdminLoginPage is currently implemented in JSX and has no TypeScript declaration file.
+// @ts-expect-error The JSX module is valid at runtime but is not typed yet.
+import AdminLoginPage from "./pages/AdminLoginPage";
+// AdminDashboardPage is currently implemented in JSX and has no TypeScript declaration file.
+// @ts-expect-error The JSX module is valid at runtime but is not typed yet.
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+// AdminLayout is currently implemented in JSX and has no TypeScript declaration file.
+// @ts-expect-error The JSX module is valid at runtime but is not typed yet.
+import AdminLayout from "./layouts/AdminLayout";
+// ProtectedRoute is currently implemented in JSX and has no TypeScript declaration file.
+// @ts-expect-error The JSX module is valid at runtime but is not typed yet.
+import ProtectedRoute from "./components/ProtectedRoute";
+// AdminOrdersPage is currently implemented in JSX and has no TypeScript declaration file.
+// @ts-expect-error The JSX module is valid at runtime but is not typed yet.
+import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
+// AdminOrderDetailsPage is currently implemented in JSX and has no TypeScript declaration file.
+// @ts-expect-error The JSX module is valid at runtime but is not typed yet.
+import AdminOrderDetailsPage from "./pages/admin/AdminOrderDetailsPage";
 
 const App = () => {
     return (
@@ -26,6 +44,38 @@ const App = () => {
                         path="/order-success"
                         element={<OrderSuccessPage />}
                     />
+                    <Route
+                        path="/admin/login"
+                        element={<AdminLoginPage />}
+                    />
+
+
+                    {/* Protected Admin */}
+                    <Route element={<ProtectedRoute />}>
+
+                        <Route
+                            path="/admin"
+                            element={<AdminLayout />}
+                        >
+
+                            <Route
+                                index
+                                element={<AdminDashboardPage />}
+                            />
+
+                            <Route
+                                path="orders"
+                                element={<AdminOrdersPage />}
+                            />
+
+                            <Route
+                                path="orders/:id"
+                                element={<AdminOrderDetailsPage />}
+                            />
+
+                        </Route>
+
+                    </Route>
                     <Route
                         path="*"
                         element={<Navigate to="/menu" replace />}
