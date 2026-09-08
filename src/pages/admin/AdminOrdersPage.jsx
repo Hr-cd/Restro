@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import {
     Clock3,
@@ -9,10 +10,11 @@ import {
 import api from "../../services/api";
 
 const AdminOrdersPage = () => {
-
+    const navigate = useNavigate();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [notification, setNotification] = useState(null);
 
     const fetchOrders = async () => {
         try {
@@ -28,16 +30,61 @@ const AdminOrdersPage = () => {
         }
     };
 
+    const playNotificationSound = () => {
+        const AudioContext =
+            window.AudioContext || window.webkitAudioContext;
+
+        if (!AudioContext) return;
+
+        const audioContext = new AudioContext();
+
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(
+            880,
+            audioContext.currentTime
+        );
+
+        gainNode.gain.setValueAtTime(
+            0.2,
+            audioContext.currentTime
+        );
+
+        oscillator.start();
+
+        oscillator.frequency.setValueAtTime(
+            660,
+            audioContext.currentTime + 0.15
+        );
+
+        oscillator.stop(audioContext.currentTime + 0.3);
+    };
+
     useEffect(() => {
     const socket = io("http://localhost:3000");
 
     socket.on("new-order", (newOrder) => {
         console.log("New order received:", newOrder);
-
+        playNotificationSound();
         setOrders((prevOrders) => [
             newOrder,
             ...prevOrders
         ]);
+
+        setNotification({
+            orderId: newOrder._id,
+            orderNumber: newOrder.orderNumber,
+            tableNumber: newOrder.tableId?.tableNumber || "-"
+        });
+
+        setTimeout(() => {
+            setNotification(null);
+        }, 5000);
     });
 
     return () => {
@@ -69,8 +116,41 @@ const AdminOrdersPage = () => {
     };
 
     return (
+        
         <div>
+            {notification && (
+                <button
+                    onClick={() => {
+                        navigate(`/admin/orders/${notification.orderId}`);
+                        setNotification(null);
+                    }}
+                    className="fixed right-5 top-5 z-50 w-[320px] rounded-2xl border bg-white p-5 text-left shadow-xl transition hover:scale-[1.02]"
+                >
+                    <div className="flex items-start gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-xl">
+                            🔔
+                        </div>
 
+                        <div>
+                            <p className="font-bold">
+                                New Order Received
+                            </p>
+
+                            <p className="mt-1 text-sm text-gray-500">
+                                Order #{notification.orderNumber}
+                            </p>
+
+                            <p className="text-sm text-gray-500">
+                                Table {notification.tableNumber}
+                            </p>
+
+                            <p className="mt-2 text-xs font-medium text-gray-400">
+                                Click to view order
+                            </p>
+                        </div>
+                    </div>
+                </button>
+            )}
             {/* Header */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
