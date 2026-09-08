@@ -35,6 +35,9 @@ import AdminCategoriesPage from "./pages/admin/AdminCategoriesPage";
 // AdminMenuPage is currently implemented in JSX and has no TypeScript declaration file.
 // @ts-expect-error The JSX module is valid at runtime but is not typed yet.
 import AdminMenuPage from "./pages/admin/AdminMenuPage";
+// AdminTablesPage is currently implemented in JSX and has no TypeScript declaration file.
+// @ts-expect-error The JSX module is valid at runtime but is not typed yet.
+import AdminTablesPage from "./pages/AdminTablesPage";
 
 const App = () => {
     return (
@@ -80,6 +83,8 @@ const App = () => {
                             />
 
                             <Route path="menu" element={<AdminMenuPage />} />
+
+                            <Route path="tables" element={<AdminTablesPage />} />
 
                             <Route
                                 path="categories"
