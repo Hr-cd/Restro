@@ -8,6 +8,9 @@ import MenuPage from "./pages/MenuPage";
 // CheckoutPage is currently implemented in JSX and has no TypeScript declaration file.
 // @ts-expect-error The JSX module is valid at runtime but is not typed yet.
 import CheckoutPage from "./pages/CheckoutPage";
+// OrderSuccessPage is currently implemented in JSX and has no TypeScript declaration file.
+// @ts-expect-error The JSX module is valid at runtime but is not typed yet.
+import OrderSuccessPage from "./pages/OrderSuccessPage";
 
 const App = () => {
     return (
@@ -18,6 +21,10 @@ const App = () => {
                     <Route
                         path="/checkout"
                         element={<CheckoutPage />}
+                    />
+                    <Route
+                        path="/order-success"
+                        element={<OrderSuccessPage />}
                     />
                     <Route
                         path="*"

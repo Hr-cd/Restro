@@ -5,6 +5,7 @@ import {
     X
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 
 const CartDrawer = ({ isOpen, onClose }) => {
@@ -16,6 +17,8 @@ const CartDrawer = ({ isOpen, onClose }) => {
         getItemUnitPrice,
         subtotal
     } = useCart();
+    const [searchParams] = useSearchParams();
+    const tableToken = searchParams.get("tableToken");
     const navigate = useNavigate();
     if (!isOpen) {
         return null;
@@ -218,7 +221,13 @@ const CartDrawer = ({ isOpen, onClose }) => {
                         <button
                             onClick={() => {
                                 onClose();
-                                navigate("/checkout");
+                                navigate(
+                                    `/checkout${
+                                        tableToken
+                                            ? `?tableToken=${tableToken}`
+                                            : ""
+                                    }`
+                                );
                             }}
                             className="w-full rounded-xl bg-black py-3 font-semibold text-white transition hover:opacity-90"
                         >

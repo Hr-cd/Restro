@@ -87,34 +87,46 @@ const CheckoutPage = () => {
         /*
          * Order API will be connected in the next step.
          */
-
-        console.log({
-            tableId: table._id,
-            customer: {
-                name: customerName,
-                mobile
-            },
-            items: cartItems,
-            subtotal
-        });
-
         setPlacingOrder(true);
 
-        setTimeout(() => {
-            setPlacingOrder(false);
+        try {
+            const response = await api.post("/orders", {
+                tableId: table._id,
+
+                customer: {
+                    name: customerName,
+                    mobile
+                },
+
+                items: cartItems.map((item) => ({
+                    foodItemId: item._id,
+                    quantity: item.quantity,
+                    addons: item.addons || [],
+                    note: item.note || ""
+                }))
+            });
+
+            console.log("Order created:", response.data);
+
+            const createdOrder = response.data.data;
 
             clearCart();
 
-            alert("Checkout validation successful!");
-
-            navigate(
-                `/menu${
+            navigate("/order-success", {
+                state: {
+                    order: createdOrder,
                     tableToken
-                        ? `?tableToken=${tableToken}`
-                        : ""
-                }`
+                }
+            });
+
+        } catch (error) {
+            setError(
+                error.response?.data?.message ||
+                "Failed to place order. Please try again."
             );
-        }, 500);
+        } finally {
+            setPlacingOrder(false);
+        }
     };
 
     if (cartItems.length === 0) {
