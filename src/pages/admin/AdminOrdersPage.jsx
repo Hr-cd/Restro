@@ -15,6 +15,11 @@ const AdminOrdersPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [notification, setNotification] = useState(null);
+    const [tables, setTables] = useState([]);
+    const [selectedTable, setSelectedTable] = useState("");
+    const [tableLoading, setTableLoading] = useState(false);
+    const [selectedStatus, setSelectedStatus] = useState("");
+    const [selectedDate, setSelectedDate] = useState("");
 
     const fetchOrders = async () => {
         try {
@@ -65,6 +70,40 @@ const AdminOrdersPage = () => {
         oscillator.stop(audioContext.currentTime + 0.3);
     };
 
+    const fetchOrdersByTable = async (tableId) => {
+        if (!tableId) {
+            fetchOrders();
+            return;
+        }
+
+        try {
+            setTableLoading(true);
+
+            const response = await api.get(
+                `/admin/orders/table/${tableId}`
+            );
+
+            setOrders(response.data.data);
+        } catch (error) {
+            console.error("Failed to fetch table orders:", error);
+        } finally {
+            setTableLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        const fetchTables = async () => {
+            try {
+                const response = await api.get("/admin/tables");
+                setTables(response.data.data);
+            } catch (error) {
+                console.error("Failed to fetch tables:", error);
+            }
+        };
+
+        fetchTables();
+    }, []);
+
     useEffect(() => {
     const socket = io("http://localhost:3000");
 
@@ -114,6 +153,17 @@ const AdminOrdersPage = () => {
 
         return classes[status] || "bg-gray-100 text-gray-600";
     };
+
+    const filteredOrders = orders.filter((order) => {
+        const matchesStatus =
+            !selectedStatus || order.status === selectedStatus;
+
+        const matchesDate =
+            !selectedDate ||
+            new Date(order.createdAt).toISOString().split("T")[0] === selectedDate;
+
+        return matchesStatus && matchesDate;
+    });
 
     return (
         
@@ -186,12 +236,104 @@ const AdminOrdersPage = () => {
                 </div>
             )}
 
+            {/* Order History Filters */}
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+
+                {/* Table */}
+                <select
+                    value={selectedTable}
+                    onChange={(e) => {
+                        const tableId = e.target.value;
+                        setSelectedTable(tableId);
+                        fetchOrdersByTable(tableId);
+                    }}
+                    className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium outline-none focus:border-gray-400"
+                >
+                    <option value="">All Tables</option>
+
+                    {tables.map((table) => (
+                        <option key={table._id} value={table._id}>
+                            Table {table.tableNumber}
+                        </option>
+                    ))}
+                </select>
+
+                {/* Status */}
+                <select
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                    className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium outline-none focus:border-gray-400"
+                >
+                    <option value="">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="preparing">Preparing</option>
+                    <option value="ready">Ready</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+
+                {/* Date */}
+                <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium outline-none focus:border-gray-400"
+                />
+
+                {/* Clear */}
+                {(selectedTable || selectedStatus || selectedDate) && (
+                    <button
+                        onClick={() => {
+                            setSelectedTable("");
+                            setSelectedStatus("");
+                            setSelectedDate("");
+                            fetchOrders();
+                        }}
+                        className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+                    >
+                        Clear Filters
+                    </button>
+                )}
+
+            </div>
+
+            {/* Selected Table */}
+            {selectedTable && (
+                <div className="mt-4 rounded-xl bg-gray-50 px-4 py-3">
+                    <p className="text-sm text-gray-500">
+                        Showing orders for
+                    </p>
+
+                    <p className="font-semibold text-gray-900">
+                        Table{" "}
+                        {
+                            tables.find(
+                                (table) => table._id === selectedTable
+                            )?.tableNumber
+                        }
+                    </p>
+                </div>
+            )}
+
+            {orders.length > 0 && (
+                <div className="mt-4 text-sm text-gray-500">
+                    Showing <span className="font-semibold text-gray-900">
+                        {filteredOrders.length}
+                    </span>{" "}
+                    of{" "}
+                    <span className="font-semibold text-gray-900">
+                        {orders.length}
+                    </span>{" "}
+                    orders
+                </div>
+            )}
+
             {/* Loading */}
-            {loading ? (
+            {loading || tableLoading ? (
                 <div className="mt-8 rounded-2xl border bg-white p-10 text-center text-gray-500">
                     Loading orders...
                 </div>
-            ) : orders.length === 0 ? (
+            ) : filteredOrders.length === 0 ? (
 
                 /* Empty */
                 <div className="mt-8 rounded-2xl border bg-white p-12 text-center">
@@ -202,11 +344,11 @@ const AdminOrdersPage = () => {
                     />
 
                     <h2 className="mt-4 text-lg font-semibold">
-                        No orders yet
+                        No orders found
                     </h2>
 
                     <p className="mt-1 text-sm text-gray-500">
-                        New customer orders will appear here.
+                        Try changing your filters or select another date.
                     </p>
 
                 </div>
@@ -261,7 +403,7 @@ const AdminOrdersPage = () => {
 
                             <tbody className="divide-y">
 
-                                {orders.map((order) => (
+                                {filteredOrders.map((order) => (
 
                                     <tr
                                         key={order._id}
