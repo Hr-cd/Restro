@@ -1,9 +1,9 @@
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-
 import api from "../services/api";
 import { useCart } from "../context/CartContext";
+import { useSettings } from "../context/SettingsContext";
 
 const CheckoutPage = () => {
     const navigate = useNavigate();
@@ -23,12 +23,13 @@ const CheckoutPage = () => {
     const [mobile, setMobile] = useState("");
 
     const [table, setTable] = useState(null);
-
     const [loadingTable, setLoadingTable] = useState(true);
     const [placingOrder, setPlacingOrder] = useState(false);
-
+    const { settings, currencySymbol} = useSettings();
     const [error, setError] = useState("");
 
+
+    // Resolve table
     useEffect(() => {
         const resolveTable = async () => {
             if (!tableToken) {
@@ -59,6 +60,25 @@ const CheckoutPage = () => {
         resolveTable();
     }, [tableToken]);
 
+    // Calculate charges for display
+    const tax = settings.gstEnabled
+        ? (subtotal * settings.gstPercentage) / 100
+        : 0;
+
+    const serviceCharge = settings.serviceChargeEnabled
+        ? (subtotal * settings.serviceChargePercentage) / 100
+        : 0;
+
+    const deliveryCharge = settings.deliveryChargeEnabled
+        ? Number(settings.deliveryCharge)
+        : 0;
+
+    const total =
+        subtotal +
+        tax +
+        serviceCharge +
+        deliveryCharge;
+
     const handlePlaceOrder = async (e) => {
         e.preventDefault();
 
@@ -84,9 +104,6 @@ const CheckoutPage = () => {
             return;
         }
 
-        /*
-         * Order API will be connected in the next step.
-         */
         setPlacingOrder(true);
 
         try {
@@ -106,7 +123,10 @@ const CheckoutPage = () => {
                 }))
             });
 
-            console.log("Order created:", response.data);
+            console.log(
+                "Order created:",
+                response.data
+            );
 
             const createdOrder = response.data.data;
 
@@ -129,10 +149,13 @@ const CheckoutPage = () => {
         }
     };
 
+
     if (cartItems.length === 0) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+
                 <div className="text-center">
+
                     <h1 className="text-2xl font-bold">
                         Your cart is empty
                     </h1>
@@ -155,7 +178,9 @@ const CheckoutPage = () => {
                     >
                         Back to Menu
                     </button>
+
                 </div>
+
             </div>
         );
     }
@@ -164,8 +189,11 @@ const CheckoutPage = () => {
         <div className="min-h-screen bg-gray-50">
 
             {/* Header */}
+
             <header className="border-b bg-white">
+
                 <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-5">
+
                     <button
                         onClick={() => navigate(-1)}
                         className="rounded-lg p-2 hover:bg-gray-100"
@@ -174,6 +202,7 @@ const CheckoutPage = () => {
                     </button>
 
                     <div>
+
                         <h1 className="text-2xl font-bold">
                             Checkout
                         </h1>
@@ -181,13 +210,18 @@ const CheckoutPage = () => {
                         <p className="text-sm text-gray-500">
                             Complete your order
                         </p>
+
                     </div>
+
                 </div>
+
             </header>
+
 
             <main className="mx-auto grid max-w-5xl gap-6 px-4 py-6 lg:grid-cols-5">
 
                 {/* Customer Details */}
+
                 <div className="lg:col-span-3">
 
                     <form
@@ -196,23 +230,30 @@ const CheckoutPage = () => {
                     >
 
                         {/* Table */}
+
                         <section className="rounded-2xl border bg-white p-5">
+
                             <h2 className="text-lg font-bold">
                                 Table
                             </h2>
 
                             {loadingTable ? (
+
                                 <p className="mt-3 text-sm text-gray-500">
                                     Detecting table...
                                 </p>
+
                             ) : table ? (
+
                                 <div className="mt-4 flex items-center gap-3 rounded-xl bg-gray-50 p-4">
+
                                     <CheckCircle
                                         className="text-green-600"
                                         size={22}
                                     />
 
                                     <div>
+
                                         <p className="text-sm text-gray-500">
                                             Ordering for
                                         </p>
@@ -220,18 +261,27 @@ const CheckoutPage = () => {
                                         <p className="font-semibold">
                                             Table {table.tableNumber}
                                         </p>
+
                                     </div>
+
                                 </div>
+
                             ) : (
+
                                 <div className="mt-4 rounded-xl bg-red-50 p-4 text-sm text-red-600">
                                     Table not detected.
                                     Please scan the QR code again.
                                 </div>
+
                             )}
+
                         </section>
 
+
                         {/* Customer */}
+
                         <section className="rounded-2xl border bg-white p-5">
+
                             <h2 className="text-lg font-bold">
                                 Customer Details
                             </h2>
@@ -239,6 +289,7 @@ const CheckoutPage = () => {
                             <div className="mt-4 space-y-4">
 
                                 <div>
+
                                     <label className="mb-2 block text-sm font-medium">
                                         Name
                                     </label>
@@ -254,9 +305,12 @@ const CheckoutPage = () => {
                                         placeholder="Enter your name"
                                         className="w-full rounded-xl border px-4 py-3 outline-none focus:ring-2"
                                     />
+
                                 </div>
 
+
                                 <div>
+
                                     <label className="mb-2 block text-sm font-medium">
                                         Mobile Number
                                     </label>
@@ -272,16 +326,22 @@ const CheckoutPage = () => {
                                         placeholder="Enter mobile number"
                                         className="w-full rounded-xl border px-4 py-3 outline-none focus:ring-2"
                                     />
+
                                 </div>
 
                             </div>
+
                         </section>
 
+
                         {error && (
+
                             <div className="rounded-xl bg-red-50 p-4 text-sm text-red-600">
                                 {error}
                             </div>
+
                         )}
+
 
                         <button
                             type="submit"
@@ -298,70 +358,167 @@ const CheckoutPage = () => {
                         </button>
 
                     </form>
+
                 </div>
 
+
                 {/* Order Summary */}
+
                 <div className="lg:col-span-2">
+
                     <section className="sticky top-6 rounded-2xl border bg-white p-5">
 
                         <h2 className="text-lg font-bold">
                             Order Summary
                         </h2>
 
+
                         <div className="mt-5 space-y-4">
+
                             {cartItems.map((item) => {
+
                                 const unitPrice =
                                     getItemUnitPrice(item);
 
                                 return (
+
                                     <div
                                         key={item.cartKey}
                                         className="flex justify-between gap-4"
                                     >
+
                                         <div>
+
                                             <p className="font-medium">
                                                 {item.name}
                                             </p>
 
                                             <p className="text-sm text-gray-500">
-                                                {item.quantity} × ₹
+                                                {item.quantity} x{" "}
+                                                {currencySymbol}
                                                 {unitPrice}
                                             </p>
+
                                         </div>
 
                                         <span className="font-medium">
-                                            ₹
-                                            {unitPrice *
-                                                item.quantity}
+                                            {currencySymbol}
+                                            {unitPrice * item.quantity}
                                         </span>
+
                                     </div>
+
                                 );
                             })}
+
                         </div>
+
 
                         <div className="my-5 border-t" />
 
+
+                        {/* Subtotal */}
+
                         <div className="flex justify-between text-sm">
-                            <span>Subtotal</span>
-                            <span>₹{subtotal}</span>
+
+                            <span>
+                                Subtotal
+                            </span>
+
+                            <span>
+                                {currencySymbol}
+                                {subtotal}
+                            </span>
+
                         </div>
 
-                        <div className="mt-2 flex justify-between text-sm text-gray-500">
-                            <span>Tax</span>
-                            <span>₹0</span>
-                        </div>
+
+                        {/* GST */}
+
+                        {settings.gstEnabled && (
+
+                            <div className="mt-2 flex justify-between text-sm text-gray-500">
+
+                                <span>
+                                    GST ({settings.gstPercentage}%)
+                                </span>
+
+                                <span>
+                                    {currencySymbol}
+                                    {tax.toFixed(2)}
+                                </span>
+
+                            </div>
+
+                        )}
+
+
+                        {/* Service Charge */}
+
+                        {settings.serviceChargeEnabled && (
+
+                            <div className="mt-2 flex justify-between text-sm text-gray-500">
+
+                                <span>
+                                    Service Charge (
+                                    {settings.serviceChargePercentage}
+                                    %)
+                                </span>
+
+                                <span>
+                                    {currencySymbol}
+                                    {serviceCharge.toFixed(2)}
+                                </span>
+
+                            </div>
+
+                        )}
+
+
+                        {/* Delivery Charge */}
+
+                        {settings.deliveryChargeEnabled && (
+
+                            <div className="mt-2 flex justify-between text-sm text-gray-500">
+
+                                <span>
+                                    Delivery Charge
+                                </span>
+
+                                <span>
+                                    {currencySymbol}
+                                    {deliveryCharge.toFixed(2)}
+                                </span>
+
+                            </div>
+
+                        )}
+
 
                         <div className="my-4 border-t" />
 
+
+                        {/* Total */}
+
                         <div className="flex justify-between text-xl font-bold">
-                            <span>Total</span>
-                            <span>₹{subtotal}</span>
+
+                            <span>
+                                Total
+                            </span>
+
+                            <span>
+                                {currencySymbol}
+                                {total.toFixed(2)}
+                            </span>
+
                         </div>
 
                     </section>
+
                 </div>
 
             </main>
+
         </div>
     );
 };

@@ -1,14 +1,17 @@
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import FoodCustomizationModal from "./FoodCustomizationModal";
 import { useCart } from "../../context/CartContext";
+import { useSettings } from "../../context/SettingsContext";
 
 const FoodCard = ({ item }) => {
     const { addToCart } = useCart();
 
     const [customizationOpen, setCustomizationOpen] =
         useState(false);
+
+    const { currencySymbol } = useSettings();
 
     const handleAddToCart = (customizedItem) => {
         addToCart(customizedItem);
@@ -17,7 +20,7 @@ const FoodCard = ({ item }) => {
     return (
         <>
             <div className="overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
-                
+
                 <div className="aspect-4/3 bg-gray-100">
                     {item.image ? (
                         <img
@@ -54,7 +57,7 @@ const FoodCard = ({ item }) => {
 
                     <div className="flex items-center justify-between">
                         <span className="text-lg font-bold">
-                            ₹{item.price}
+                            {currencySymbol}{item.price}
                         </span>
 
                         <button

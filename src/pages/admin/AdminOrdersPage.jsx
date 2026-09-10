@@ -6,7 +6,7 @@ import {
     Eye,
     RefreshCw
 } from "lucide-react";
-
+import { useSettings } from "../../context/SettingsContext";
 import api from "../../services/api";
 
 const AdminOrdersPage = () => {
@@ -20,6 +20,7 @@ const AdminOrdersPage = () => {
     const [tableLoading, setTableLoading] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState("");
     const [selectedDate, setSelectedDate] = useState("");
+    const {currencySymbol} = useSettings();
 
     const fetchOrders = async () => {
         try {
@@ -442,7 +443,7 @@ const AdminOrdersPage = () => {
                                         </td>
 
                                         <td className="px-5 py-4 font-semibold">
-                                            ₹{order.total}
+                                            {currencySymbol}{order.total}
                                         </td>
 
                                         <td className="px-5 py-4">

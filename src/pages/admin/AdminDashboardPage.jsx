@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api.js";
 import { Link } from "react-router-dom";
+import { useSettings } from "../../context/SettingsContext";
 
 const AdminDashboardPage = () => {
     const admin = JSON.parse(
         localStorage.getItem("restro_admin") || "{}"
     );
-
+    const { currencySymbol } = useSettings();
     const [dashboard, setDashboard] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -148,7 +149,7 @@ const AdminDashboardPage = () => {
                     </p>
 
                     <p className="mt-2 text-3xl font-bold">
-                        ₹{dashboard.todaySales.toLocaleString("en-IN")}
+                        {currencySymbol}{dashboard.todaySales.toLocaleString("en-IN")}
                     </p>
                 </div>
 
@@ -302,7 +303,7 @@ const AdminDashboardPage = () => {
                                         </td>
 
                                         <td className="px-5 py-4 font-medium">
-                                            ₹{order.total.toLocaleString("en-IN")}
+                                            {currencySymbol}{order.total.toLocaleString("en-IN")}
                                         </td>
 
                                         <td className="px-5 py-4">

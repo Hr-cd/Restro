@@ -7,6 +7,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
+import { useSettings } from "../../context/SettingsContext";
 
 const CartDrawer = ({ isOpen, onClose }) => {
     const {
@@ -18,6 +19,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
         subtotal
     } = useCart();
     const [searchParams] = useSearchParams();
+    const { currencySymbol } = useSettings();
     const tableToken = searchParams.get("tableToken");
     const navigate = useNavigate();
     if (!isOpen) {
@@ -117,7 +119,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
                                                 </div>
 
                                                 <p className="mt-1 text-sm text-gray-500">
-                                                    ₹{item.price}
+                                                    {currencySymbol}{item.price}
                                                 </p>
 
                                                 {/* Add-ons */}
@@ -136,11 +138,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
                                                                         }
                                                                     >
                                                                         {addon.name}{" "}
-                                                                        (+₹
-                                                                        {
-                                                                            addon.price
-                                                                        }
-                                                                        )
+                                                                        (+{currencySymbol}{addon.price})
                                                                     </div>
                                                                 )
                                                             )}
@@ -190,9 +188,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
                                                     </div>
 
                                                     <span className="font-semibold">
-                                                        ₹
-                                                        {unitPrice *
-                                                            item.quantity}
+                                                        {currencySymbol}{unitPrice * item.quantity}
                                                     </span>
                                                 </div>
 
@@ -214,7 +210,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
                             <span>Subtotal</span>
 
                             <span>
-                                ₹{subtotal}
+                                {currencySymbol}{subtotal}
                             </span>
                         </div>
 

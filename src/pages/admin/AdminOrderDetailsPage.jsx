@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../services/api";
+import { useSettings } from "../../context/SettingsContext";
 
 const AdminOrderDetailsPage = () => {
     const { id } = useParams();
@@ -16,6 +17,7 @@ const AdminOrderDetailsPage = () => {
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const { currencySymbol } = useSettings();
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -283,7 +285,7 @@ const AdminOrderDetailsPage = () => {
                                         </h3>
 
                                         <p className="mt-1 text-sm text-gray-500">
-                                            {item.quantity} × ₹
+                                            {item.quantity} x {currencySymbol}
                                             {item.price}
                                         </p>
 
@@ -297,7 +299,7 @@ const AdminOrderDetailsPage = () => {
                                                             key={addonIndex}
                                                             className="text-sm text-gray-500"
                                                         >
-                                                            + {addon.name} — ₹
+                                                            + {addon.name} — {currencySymbol}
                                                             {addon.price}
                                                         </p>
                                                     )
@@ -316,8 +318,7 @@ const AdminOrderDetailsPage = () => {
                                     </div>
 
                                     <p className="font-semibold">
-                                        ₹
-                                        {item.price *
+                                        {currencySymbol}{item.price *
                                             item.quantity}
                                     </p>
 
@@ -347,7 +348,7 @@ const AdminOrderDetailsPage = () => {
                             </span>
 
                             <span>
-                                ₹{order.subtotal}
+                                {currencySymbol}{order.subtotal}
                             </span>
                         </div>
 
@@ -357,7 +358,7 @@ const AdminOrderDetailsPage = () => {
                             </span>
 
                             <span>
-                                ₹{order.tax}
+                                {currencySymbol}{order.tax}
                             </span>
                         </div>
 
@@ -367,7 +368,7 @@ const AdminOrderDetailsPage = () => {
                             </span>
 
                             <span>
-                                ₹{order.serviceCharge}
+                                {currencySymbol}{order.serviceCharge}
                             </span>
                         </div>
 
@@ -377,7 +378,7 @@ const AdminOrderDetailsPage = () => {
                             </span>
 
                             <span>
-                                ₹{order.deliveryCharge}
+                                {currencySymbol}{order.deliveryCharge}
                             </span>
                         </div>
 
@@ -390,7 +391,7 @@ const AdminOrderDetailsPage = () => {
                                 </span>
 
                                 <span className="text-xl font-bold">
-                                    ₹{order.total}
+                                    {currencySymbol}{order.total}
                                 </span>
 
                             </div>

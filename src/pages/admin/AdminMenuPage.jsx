@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import { useSettings } from "../../context/SettingsContext";
 
 const emptyForm = {
     categoryId: "",
@@ -14,7 +15,7 @@ const emptyForm = {
 const AdminMenuPage = () => {
     const [foodItems, setFoodItems] = useState([]);
     const [categories, setCategories] = useState([]);
-
+    const { currencySymbol } = useSettings();
     const [search, setSearch] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
 
@@ -395,7 +396,7 @@ const AdminMenuPage = () => {
                                     </div>
 
                                     <span className="text-lg font-bold text-gray-900">
-                                        ₹{Number(item.price).toFixed(2)}
+                                        {currencySymbol}{Number(item.price).toFixed(2)}
                                     </span>
                                 </div>
 
@@ -418,7 +419,7 @@ const AdminMenuPage = () => {
                                                         key={index}
                                                         className="rounded-lg bg-gray-100 px-2.5 py-1 text-xs text-gray-600"
                                                     >
-                                                        {addon.name} +₹
+                                                        {addon.name} +{currencySymbol}
                                                         {Number(
                                                             addon.price
                                                         ).toFixed(2)}
@@ -666,7 +667,7 @@ const AdminMenuPage = () => {
 
                                                     <div className="flex items-center gap-3">
                                                         <span className="text-sm font-semibold text-gray-900">
-                                                            ₹
+                                                            {currencySymbol}
                                                             {Number(
                                                                 addon.price
                                                             ).toFixed(2)}

@@ -8,7 +8,7 @@ import {
     ShoppingBag,
     TrendingUp
 } from "lucide-react";
-
+import { useSettings } from "../../context/SettingsContext";
 import api from "../../services/api";
 
 const AdminReportsPage = () => {
@@ -19,6 +19,7 @@ const AdminReportsPage = () => {
      * toISOString() converts the date to UTC and can shift
      * the calendar date backward in India.
      */
+    const { currencySymbol } = useSettings();
     const getLocalDateString = (date = new Date()) => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -54,12 +55,11 @@ const AdminReportsPage = () => {
 
     const [error, setError] = useState("");
 
-    const formatCurrency = (value = 0) => {
-        return `₹${Number(value || 0).toLocaleString("en-IN", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        })}`;
-    };
+    const formatCurrency = (value) => {
+    return `${currencySymbol}${Number(value || 0).toLocaleString("en-IN", {
+        maximumFractionDigits: 2
+    })}`;
+};
 
     /*
      * Fetch currently selected report.

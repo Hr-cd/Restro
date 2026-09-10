@@ -1,5 +1,6 @@
 import { Minus, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSettings } from "../../context/SettingsContext";
 
 const FoodCustomizationModal = ({
     item,
@@ -10,6 +11,7 @@ const FoodCustomizationModal = ({
     const [quantity, setQuantity] = useState(1);
     const [selectedAddons, setSelectedAddons] = useState([]);
     const [note, setNote] = useState("");
+    const { currencySymbol } = useSettings();
 
     useEffect(() => {
         if (isOpen) {
@@ -108,7 +110,7 @@ const FoodCustomizationModal = ({
                             </p>
 
                             <p className="mt-2 font-semibold">
-                                ₹{item.price}
+                                {currencySymbol}{item.price}
                             </p>
                         </div>
                     </div>
@@ -152,7 +154,7 @@ const FoodCustomizationModal = ({
                                             </div>
 
                                             <span className="font-medium">
-                                                +₹{addon.price}
+                                                +{currencySymbol}{addon.price}
                                             </span>
                                         </label>
                                     );
@@ -221,7 +223,7 @@ const FoodCustomizationModal = ({
                         <span>Add to Cart</span>
 
                         <span>
-                            ₹{total}
+                            {currencySymbol}{total}
                         </span>
                     </button>
                 </div>

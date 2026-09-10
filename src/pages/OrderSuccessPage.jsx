@@ -9,11 +9,12 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import api from "../services/api";
+import { useSettings } from "../context/SettingsContext";
 
 const OrderSuccessPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
-
+    const { currencySymbol } = useSettings();
     const initialOrder = location.state?.order;
     const tableToken = location.state?.tableToken;
 
@@ -255,7 +256,7 @@ const OrderSuccessPage = () => {
                                         </p>
 
                                         <p className="text-sm text-gray-500">
-                                            {item.quantity} × ₹
+                                            {item.quantity} x {currencySymbol}
                                             {item.price +
                                                 addonTotal}
                                         </p>
@@ -280,7 +281,7 @@ const OrderSuccessPage = () => {
                                     </div>
 
                                     <span className="font-semibold">
-                                        ₹{itemTotal}
+                                        {currencySymbol}{itemTotal}
                                     </span>
                                 </div>
                             );
@@ -289,34 +290,44 @@ const OrderSuccessPage = () => {
 
                     {/* Totals */}
                     <div className="mt-5 border-t pt-5">
+                        {/* Subtotal */}
                         <div className="flex justify-between">
-                            <span>
-                                Subtotal
-                            </span>
-
-                            <span>
-                                ₹{order.subtotal}
-                            </span>
+                            <span>Subtotal</span>
+                            <span>{currencySymbol}{Number(order.subtotal).toFixed(2)}</span>
                         </div>
 
-                        <div className="mt-2 flex justify-between text-gray-500">
-                            <span>
-                                Tax
-                            </span>
+                        {/* GST / Tax */}
+                        {Number(order.tax) > 0 && (
+                            <div className="mt-2 flex justify-between text-gray-500">
+                                <span>Tax</span>
+                                <span>{currencySymbol}{Number(order.tax).toFixed(2)}</span>
+                            </div>
+                        )}
 
-                            <span>
-                                ₹{order.tax}
-                            </span>
-                        </div>
+                        {/* Service Charge */}
+                        {Number(order.serviceCharge) > 0 && (
+                            <div className="mt-2 flex justify-between text-gray-500">
+                                <span>Service Charge</span>
+                                <span>
+                                    {currencySymbol}{Number(order.serviceCharge).toFixed(2)}
+                                </span>
+                            </div>
+                        )}
 
+                        {/* Delivery Charge */}
+                        {Number(order.deliveryCharge) > 0 && (
+                            <div className="mt-2 flex justify-between text-gray-500">
+                                <span>Delivery Charge</span>
+                                <span>
+                                    {currencySymbol}{Number(order.deliveryCharge).toFixed(2)}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Total */}
                         <div className="mt-4 flex justify-between border-t pt-4 text-xl font-bold">
-                            <span>
-                                Total
-                            </span>
-
-                            <span>
-                                ₹{order.total}
-                            </span>
+                            <span>Total</span>
+                            <span>{currencySymbol}{Number(order.total).toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
