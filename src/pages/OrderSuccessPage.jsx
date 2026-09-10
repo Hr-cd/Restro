@@ -4,34 +4,122 @@ import {
     MapPin,
     Receipt
 } from "lucide-react";
+
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
+import api from "../services/api";
 
 const OrderSuccessPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const order = location.state?.order;
+
+    const initialOrder = location.state?.order;
     const tableToken = location.state?.tableToken;
-    const [status, setStatus] = useState(order?.status || "pending");
 
+    const [order, setOrder] = useState(initialOrder || null);
+    const [status, setStatus] = useState(
+        initialOrder?.status || "pending"
+    );
+    const [loading, setLoading] = useState(!initialOrder);
+
+    /*
+     * Keep the order ID in sessionStorage.
+     *
+     * This survives browser refresh while keeping the order
+     * associated with the current browser session.
+     */
     useEffect(() => {
-    if (!order?._id) return;
-
-    const socket = io("http://localhost:3000");
-
-    socket.on("order-status-updated", (updatedOrder) => {
-        console.log("Order status updated:", updatedOrder);
-
-        if (updatedOrder.orderId === order._id) {
-            setStatus(updatedOrder.status);
+        if (initialOrder?._id) {
+            sessionStorage.setItem(
+                "lastOrderId",
+                initialOrder._id
+            );
         }
-    });
+    }, [initialOrder]);
 
-    return () => {
-        socket.disconnect();
-    };
-}, [order?._id]);
+    /*
+     * Restore the order after page refresh.
+     */
+    useEffect(() => {
+        const restoreOrder = async () => {
+            const orderId =
+                initialOrder?._id ||
+                sessionStorage.getItem("lastOrderId");
+
+            if (!orderId) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const response = await api.get(
+                    `/orders/${orderId}`
+                );
+
+                const restoredOrder = response.data.data;
+
+                setOrder(restoredOrder);
+                setStatus(restoredOrder.status);
+            } catch (error) {
+                console.error(
+                    "Failed to restore order:",
+                    error
+                );
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        restoreOrder();
+    }, [initialOrder?._id]);
+
+    /*
+     * Real-time status updates.
+     */
+    useEffect(() => {
+        if (!order?._id) return;
+
+        const socket = io("http://localhost:3000");
+
+        socket.on("order-status-updated", (updatedOrder) => {
+            console.log(
+                "Order status updated:",
+                updatedOrder
+            );
+
+            if (updatedOrder.orderId === order._id) {
+                setStatus(updatedOrder.status);
+
+                setOrder((currentOrder) =>
+                    currentOrder
+                        ? {
+                              ...currentOrder,
+                              status: updatedOrder.status
+                          }
+                        : currentOrder
+                );
+            }
+        });
+
+        return () => {
+            socket.disconnect();
+        };
+    }, [order?._id]);
+
+    if (loading) {
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+                <div className="text-center">
+                    <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-black" />
+
+                    <p className="mt-4 text-gray-500">
+                        Loading your order...
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     if (!order) {
         return (
@@ -66,12 +154,10 @@ const OrderSuccessPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-10">
-
             <div className="mx-auto max-w-2xl">
 
                 {/* Success */}
                 <div className="rounded-3xl border bg-white p-8 text-center shadow-sm">
-
                     <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-50">
                         <CheckCircle
                             size={46}
@@ -113,14 +199,11 @@ const OrderSuccessPage = () => {
                             {status}
                         </span>
                     </div>
-
                 </div>
 
                 {/* Table */}
                 <div className="mt-5 rounded-2xl border bg-white p-5">
-
                     <div className="flex items-center gap-3">
-
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100">
                             <MapPin size={20} />
                         </div>
@@ -131,17 +214,15 @@ const OrderSuccessPage = () => {
                             </p>
 
                             <p className="font-semibold">
-                                Table {order.tableId?.tableNumber || "—"}
+                                Table{" "}
+                                {order.tableId?.tableNumber || "—"}
                             </p>
                         </div>
-
                     </div>
-
                 </div>
 
                 {/* Items */}
                 <div className="mt-5 rounded-2xl border bg-white p-5">
-
                     <div className="flex items-center gap-2">
                         <Receipt size={20} />
 
@@ -151,9 +232,7 @@ const OrderSuccessPage = () => {
                     </div>
 
                     <div className="mt-5 space-y-4">
-
                         {order.items.map((item, index) => {
-
                             const addonTotal =
                                 (item.addons || []).reduce(
                                     (sum, addon) =>
@@ -170,9 +249,7 @@ const OrderSuccessPage = () => {
                                     key={index}
                                     className="flex justify-between gap-4 border-b pb-4 last:border-b-0 last:pb-0"
                                 >
-
                                     <div>
-
                                         <p className="font-medium">
                                             {item.name}
                                         </p>
@@ -183,7 +260,8 @@ const OrderSuccessPage = () => {
                                                 addonTotal}
                                         </p>
 
-                                        {item.addons?.length > 0 && (
+                                        {item.addons?.length >
+                                            0 && (
                                             <p className="mt-1 text-xs text-gray-500">
                                                 {item.addons
                                                     .map(
@@ -199,24 +277,22 @@ const OrderSuccessPage = () => {
                                                 Note: {item.note}
                                             </p>
                                         )}
-
                                     </div>
 
                                     <span className="font-semibold">
                                         ₹{itemTotal}
                                     </span>
-
                                 </div>
                             );
                         })}
-
                     </div>
 
                     {/* Totals */}
                     <div className="mt-5 border-t pt-5">
-
                         <div className="flex justify-between">
-                            <span>Subtotal</span>
+                            <span>
+                                Subtotal
+                            </span>
 
                             <span>
                                 ₹{order.subtotal}
@@ -224,7 +300,9 @@ const OrderSuccessPage = () => {
                         </div>
 
                         <div className="mt-2 flex justify-between text-gray-500">
-                            <span>Tax</span>
+                            <span>
+                                Tax
+                            </span>
 
                             <span>
                                 ₹{order.tax}
@@ -232,20 +310,19 @@ const OrderSuccessPage = () => {
                         </div>
 
                         <div className="mt-4 flex justify-between border-t pt-4 text-xl font-bold">
-                            <span>Total</span>
+                            <span>
+                                Total
+                            </span>
 
                             <span>
                                 ₹{order.total}
                             </span>
                         </div>
-
                     </div>
-
                 </div>
 
                 {/* Buttons */}
                 <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-
                     <button
                         onClick={() =>
                             navigate(
@@ -267,9 +344,7 @@ const OrderSuccessPage = () => {
                     >
                         Print Receipt
                     </button>
-
                 </div>
-
             </div>
         </div>
     );

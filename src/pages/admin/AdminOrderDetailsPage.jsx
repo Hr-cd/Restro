@@ -158,8 +158,18 @@ const AdminOrderDetailsPage = () => {
                             </button>
                         )
                     )}
+                    <button
+                        onClick={() =>
+                            window.open(
+                                `/admin/orders/${order._id}/print`,
+                                "_blank"
+                            )
+                        }
+                        className="rounded-xl border bg-white px-4 py-2.5 text-sm font-medium transition hover:bg-gray-50"
+                    >
+                        🖨️ Print Kitchen Slip
+                    </button>
                 </div>
-
             </div>
 
 

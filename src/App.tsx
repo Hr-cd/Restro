@@ -38,70 +38,83 @@ import AdminMenuPage from "./pages/admin/AdminMenuPage";
 // AdminTablesPage is currently implemented in JSX and has no TypeScript declaration file.
 // @ts-expect-error The JSX module is valid at runtime but is not typed yet.
 import AdminTablesPage from "./pages/AdminTablesPage";
+// AdminKitchenPrintPage is currently implemented in JSX and has no TypeScript declaration file.
+// @ts-expect-error The JSX module is valid at runtime but is not typed yet.
+import AdminKitchenPrintPage from "./pages/admin/AdminKitchenPrintPage";
+// AdminReportsPage is currently implemented in JSX and has no TypeScript declaration file.
+// @ts-expect-error The JSX module is valid at runtime but is not typed yet.
+import AdminReportsPage from "./pages/admin/AdminReportsPage";
 
-const App = () => {
-    return (
-        <CartProvider>
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/menu" element={<MenuPage />} />
-                    <Route
-                        path="/checkout"
-                        element={<CheckoutPage />}
-                    />
-                    <Route
-                        path="/order-success"
-                        element={<OrderSuccessPage />}
-                    />
-                    <Route
-                        path="/admin/login"
-                        element={<AdminLoginPage />}
-                    />
+const App = () => (
+    <CartProvider>
+        <BrowserRouter>
+            <Routes>
 
+                {/* CUSTOMER */}
+                <Route path="/menu" element={<MenuPage />} />
+                <Route path="/checkout" element={<CheckoutPage />} />
+                <Route path="/order-success" element={<OrderSuccessPage />} />
 
-                    {/* Protected Admin */}
-                    <Route element={<ProtectedRoute />}>
+                {/* ADMIN LOGIN */}
+                <Route path="/admin/login" element={<AdminLoginPage />} />
+
+                {/* PROTECTED ADMIN ROUTES */}
+                <Route element={<ProtectedRoute />}>
+
+                    {/* ADMIN ROUTES WITH SIDEBAR */}
+                    <Route path="/admin" element={<AdminLayout />}>
+
+                        <Route index element={<AdminDashboardPage />} />
 
                         <Route
-                            path="/admin"
-                            element={<AdminLayout />}
-                        >
+                            path="orders"
+                            element={<AdminOrdersPage />}
+                        />
 
-                            <Route
-                                index
-                                element={<AdminDashboardPage />}
-                            />
+                        <Route
+                            path="orders/:id"
+                            element={<AdminOrderDetailsPage />}
+                        />
 
-                            <Route
-                                path="orders"
-                                element={<AdminOrdersPage />}
-                            />
+                        <Route
+                            path="menu"
+                            element={<AdminMenuPage />}
+                        />
 
-                            <Route
-                                path="orders/:id"
-                                element={<AdminOrderDetailsPage />}
-                            />
+                        <Route
+                            path="tables"
+                            element={<AdminTablesPage />}
+                        />
 
-                            <Route path="menu" element={<AdminMenuPage />} />
+                        <Route
+                            path="categories"
+                            element={<AdminCategoriesPage />}
+                        />
 
-                            <Route path="tables" element={<AdminTablesPage />} />
-
-                            <Route
-                                path="categories"
-                                element={<AdminCategoriesPage />}
-                            />
-
-                        </Route>
+                        <Route
+                            path="reports"
+                            element={<AdminReportsPage />}
+                        />
 
                     </Route>
+
+                    {/* KITCHEN PRINT — NO ADMIN SIDEBAR */}
                     <Route
-                        path="*"
-                        element={<Navigate to="/menu" replace />}
+                        path="/admin/orders/:id/print"
+                        element={<AdminKitchenPrintPage />}
                     />
-                </Routes>
-            </BrowserRouter>
-        </CartProvider>
-    );
-};
+
+                </Route>
+
+                {/* FALLBACK */}
+                <Route
+                    path="*"
+                    element={<Navigate to="/menu" replace />}
+                />
+
+            </Routes>
+        </BrowserRouter>
+    </CartProvider>
+);
 
 export default App;
