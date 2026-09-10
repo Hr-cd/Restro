@@ -94,6 +94,11 @@ const CheckoutPage = () => {
             return;
         }
 
+        if (!/^\d{10}$/.test(mobile)) {
+            setError("Please enter a valid 10-digit mobile number.");
+            return;
+        }
+
         if (!table) {
             setError("Table could not be detected.");
             return;
@@ -317,12 +322,13 @@ const CheckoutPage = () => {
 
                                     <input
                                         type="tel"
+                                        inputMode="numeric"
+                                        maxLength={10}
                                         value={mobile}
-                                        onChange={(e) =>
-                                            setMobile(
-                                                e.target.value
-                                            )
-                                        }
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+                                            setMobile(value);
+                                        }}
                                         placeholder="Enter mobile number"
                                         className="w-full rounded-xl border px-4 py-3 outline-none focus:ring-2"
                                     />

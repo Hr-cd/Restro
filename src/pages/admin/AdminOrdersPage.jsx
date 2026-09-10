@@ -106,7 +106,13 @@ const AdminOrdersPage = () => {
     }, []);
 
     useEffect(() => {
-    const socket = io("http://localhost:3000");
+    const token = localStorage.getItem("restro_token");
+
+    const socket = io(import.meta.env.VITE_SOCKET_URL, {
+        auth: {
+            token
+        }
+    });
 
     socket.on("new-order", (newOrder) => {
         console.log("New order received:", newOrder);

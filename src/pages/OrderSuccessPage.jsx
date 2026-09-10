@@ -81,8 +81,9 @@ const OrderSuccessPage = () => {
     useEffect(() => {
         if (!order?._id) return;
 
-        const socket = io("http://localhost:3000");
+        const socket = io(import.meta.env.VITE_SOCKET_URL);
 
+        socket.emit("join-order", order._id);   
         socket.on("order-status-updated", (updatedOrder) => {
             console.log(
                 "Order status updated:",
